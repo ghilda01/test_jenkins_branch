@@ -30,6 +30,10 @@ spec:
             when {
                 branch 'prod'
             }
+            input {
+                message "Should we continue?"
+                ok "Yes, we should."
+            }
             steps {
                 echo 'Deploying on prod'
             }
