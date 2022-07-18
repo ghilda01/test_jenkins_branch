@@ -26,19 +26,23 @@ spec:
         JENKINS_JOB_PATH = 'Infra/cloud-infrastructure'
     }
     stages {
-        stage('Deployment') {
+        stage('prod') {
             when {
                 branch 'prod'
             }
             steps {
                 echo 'Deploying on prod'
             }
+        }
+        stage('preprod') {
           when {
                 branch 'preprod'
             }
             steps {
                 echo 'Deploying on preprod'
             }
+        }
+        stage('staging') {
           when {
                 branch 'staging'
             }
