@@ -21,10 +21,10 @@ spec:
         }
     }
     environment {
+        AWS_USER = ''
         GIT_URL = 'https://github.com/ghilda01/test_jenkins_branch'
         CREDENTIALS_ID_GIT = 'JenkinsGithub'
         JENKINS_JOB_PATH = 'Infra/cloud-infrastructure'
-        AWS_USER = null
     }
     stages {
         stage('Check environment') {
@@ -43,8 +43,10 @@ spec:
         }
         stage('Deployment') {
             when {
-                expression {
-                    return ${AWS_USER} != null
+                anyOf {
+                    branch 'prod'
+                    branch 'preprod'
+                    branch 'dev'
                 }
             }
             steps {
