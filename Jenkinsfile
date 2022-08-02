@@ -49,7 +49,6 @@ spec:
             return env.AWS_USER != null;
         }
     }
-            }
             steps {
                 echo "Deploying on env.BRANCH_NAME..."
                 echo 'docker run -i -t hashicorp/terraform:latest plan'
