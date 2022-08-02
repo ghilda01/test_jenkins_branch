@@ -52,7 +52,7 @@ spec:
             }
             steps {
                 echo "Deploying on env.BRANCH_NAME..."
-                echo 'docker run -i -t hashicorp/terraform:latest plan
+                echo 'docker run -i -t hashicorp/terraform:latest plan'
                 script {
                         input message: "Should we continue with env.AWS_USER?",ok: "Yes, we should."
                 }
