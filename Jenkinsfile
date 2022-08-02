@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label "jenkins-worker-robot-${UUID.randomUUID().toString()}"
+            label "jenkins-worker-terraform-${UUID.randomUUID().toString()}"
             defaultContainer 'jnlp'
             yaml '''
 apiVersion: v1
@@ -14,9 +14,8 @@ spec:
       pull: always
 
     - name: terraform
-      image: hashicorp/terraform
+      image: eu.gcr.io/somfy-protect-dev-master/jenkins-worker-terraform
       tty: true
-      pull: always
 '''
         }
     }
@@ -36,18 +35,23 @@ spec:
                 }
             }
             steps {
-                echo "Deploying on ${env.BRANCH_NAME}..."
                 withCredentials([[
                                          $class: 'AmazonWebServicesCredentialsBinding',
                                          credentialsId: "${env.BRANCH_NAME}_deployment_aws_user",
                                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                                  ]]) {
-                    sh '''terraform init && terraform plan'''
+                    container('terraform') {
+                        echo "Deploying on ${env.BRANCH_NAME}..."
+                        sh '''terraform version'''
+//                        sh '''terraform init && terraform plan'''
+                    }
                     script {
                         input message: "Should we continue with ${AWS_ACCESS_KEY_ID}?", ok: "Yes, we should."
                     }
-                    echo "terraform apply"
+                    container('terraform') {
+                        echo "terraform apply"
+                    }
                 }
             }
         }
