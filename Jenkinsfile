@@ -13,8 +13,8 @@ spec:
       tty: true
       pull: always
 
-    - name: monorepo
-      image: eu.gcr.io/somfy-protect-dev-master/jenkins-worker-robot
+    - name: terraform
+      image: hashicorp/terraform
       tty: true
       pull: always
 '''
@@ -27,20 +27,6 @@ spec:
         JENKINS_JOB_PATH = 'Infra/cloud-infrastructure'
     }
     stages {
-        stage('Check environment') {
-            when {
-                anyOf {
-                    branch 'prod'
-                    branch 'preprod'
-                    branch 'dev'
-                }
-            }
-            steps {
-                script {
-                    AWS_USER = "aws_deployment_user_${env.BRANCH_NAME}"
-                }
-            }
-        }
         stage('Deployment') {
             when {
                 anyOf {
@@ -51,11 +37,18 @@ spec:
             }
             steps {
                 echo "Deploying on ${env.BRANCH_NAME}..."
-                echo 'docker run -i -t hashicorp/terraform:latest plan'
-                script {
-                    input message: "Should we continue with ${AWS_USER}?", ok: "Yes, we should."
+                withCredentials([[
+                                         $class: 'AmazonWebServicesCredentialsBinding',
+                                         credentialsId: "${env.BRANCH_NAME}_deployment_aws_user",
+                                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                                 ]]) {
+                    sh '''terraform plan'''
+                    script {
+                        input message: "Should we continue with ${AWS_ACCESS_KEY_ID}?", ok: "Yes, we should."
+                    }
+                    echo "terraform apply"
                 }
-                echo "terraform apply"
             }
         }
     }
