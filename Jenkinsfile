@@ -24,35 +24,39 @@ spec:
         GIT_URL = 'https://github.com/ghilda01/test_jenkins_branch'
         CREDENTIALS_ID_GIT = 'JenkinsGithub'
         JENKINS_JOB_PATH = 'Infra/cloud-infrastructure'
+        AWS_USER = null
     }
     stages {
-        stage('prod') {
+        stage('Check environment') {
             when {
-                branch 'prod'
+                 anyOf{
+                     branch 'prod'
+                     branch 'preprod'
+                     branch 'dev'
+                 }
             }
-            input {
-                message "Should we continue?"
-                ok "Yes, we should."
-            }
+            
+            
             steps {
-                echo 'Deploying on prod'
+                script {
+                        AWS_USER = "aws_deployment_user_" + env.BRANCH_NAME
+                    }
             }
         }
-        stage('preprod') {
-          when {
-                branch 'preprod'
-            }
-            steps {
-                echo 'Deploying on preprod'
-            }
-        }
-        stage('staging') {
-          when {
-                branch 'staging'
-            }
-            steps {
-                echo 'Deploying on staging'
-            }
+        stage('Deployment') {
+                when {
+        expression {
+            return env.AWS_USER != null;
         }
     }
-}
+            }
+            steps {
+                echo "Deploying on env.BRANCH_NAME..."
+                echo 'docker run -i -t hashicorp/terraform:latest plan
+                script {
+                        input message: "Should we continue with env.AWS_USER?",ok: "Yes, we should."
+                }
+                echo "terraform apply"
+            }
+        }
+       }
