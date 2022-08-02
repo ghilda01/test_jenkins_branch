@@ -46,14 +46,14 @@ spec:
         stage('Deployment') {
                 when {
         expression {
-            return env.AWS_USER != null;
+            return AWS_USER != null;
         }
     }
             steps {
                 echo "Deploying on env.BRANCH_NAME..."
                 echo 'docker run -i -t hashicorp/terraform:latest plan'
                 script {
-                        input message: "Should we continue with env.AWS_USER?",ok: "Yes, we should."
+                        input message: "Should we continue with AWS_USER?",ok: "Yes, we should."
                 }
                 echo "terraform apply"
             }
