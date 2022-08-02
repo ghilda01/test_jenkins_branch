@@ -29,34 +29,32 @@ spec:
     stages {
         stage('Check environment') {
             when {
-                 anyOf{
-                     branch 'prod'
-                     branch 'preprod'
-                     branch 'dev'
-                 }
+                anyOf {
+                    branch 'prod'
+                    branch 'preprod'
+                    branch 'dev'
+                }
             }
-            
-            
             steps {
                 script {
-                        AWS_USER = "aws_deployment_user_" + env.BRANCH_NAME
-                    }
+                    AWS_USER = "aws_deployment_user_${env.BRANCH_NAME}"
+                }
             }
         }
         stage('Deployment') {
-                when {
-        expression {
-            return env.AWS_USER != null;
-        }
-    }
+            when {
+                expression {
+                    return ${AWS_USER} != null
+                }
+            }
             steps {
-                echo "Deploying on env.BRANCH_NAME..."
+                echo "Deploying on ${env.BRANCH_NAME}..."
                 echo 'docker run -i -t hashicorp/terraform:latest plan'
                 script {
-                        input message: "Should we continue with env.AWS_USER?",ok: "Yes, we should."
+                    input message: "Should we continue with ${AWS_USER}?", ok: "Yes, we should."
                 }
                 echo "terraform apply"
             }
         }
-       }
+    }
 }
