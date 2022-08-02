@@ -21,37 +21,34 @@ spec:
         }
     }
     environment {
+        AWS_USER = ''
         GIT_URL = 'https://github.com/ghilda01/test_jenkins_branch'
         CREDENTIALS_ID_GIT = 'JenkinsGithub'
         JENKINS_JOB_PATH = 'Infra/cloud-infrastructure'
     }
     stages {
-        stage('prod') {
+        stage('Deployment') {
             when {
-                branch 'prod'
-            }
-            input {
-                message "Should we continue?"
-                ok "Yes, we should."
-            }
-            steps {
-                echo 'Deploying on prod'
-            }
-        }
-        stage('preprod') {
-          when {
-                branch 'preprod'
+                anyOf {
+                    branch 'prod'
+                    branch 'preprod'
+                    branch 'dev'
+                }
             }
             steps {
-                echo 'Deploying on preprod'
-            }
-        }
-        stage('staging') {
-          when {
-                branch 'staging'
-            }
-            steps {
-                echo 'Deploying on staging'
+                echo "Deploying on ${env.BRANCH_NAME}..."
+                withCredentials([[
+                                         $class: 'AmazonWebServicesCredentialsBinding',
+                                         credentialsId: "${env.BRANCH_NAME}_deployment_aws_user",
+                                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                                 ]]) {
+                    echo 'docker run -i -t hashicorp/terraform:latest plan'
+                    script {
+                        input message: "Should we continue with ${AWS_ACCESS_KEY_ID}?", ok: "Yes, we should."
+                    }
+                    echo "terraform apply"
+                }
             }
         }
     }
