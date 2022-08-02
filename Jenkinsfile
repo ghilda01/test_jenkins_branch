@@ -13,8 +13,8 @@ spec:
       tty: true
       pull: always
 
-    - name: monorepo
-      image: eu.gcr.io/somfy-protect-dev-master/jenkins-worker-robot
+    - name: terraform
+      image: hashicorp/terraform
       tty: true
       pull: always
 '''
@@ -43,7 +43,7 @@ spec:
                                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                                  ]]) {
-                    echo 'docker run -i -t hashicorp/terraform:latest plan'
+                    sh '''terraform init && terraform plan'''
                     script {
                         input message: "Should we continue with ${AWS_ACCESS_KEY_ID}?", ok: "Yes, we should."
                     }
