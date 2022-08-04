@@ -19,6 +19,9 @@ spec:
 '''
         }
     }
+    options {
+        ansiColor('xterm')
+    }
     environment {
         AWS_USER = ''
         GIT_URL = 'https://github.com/ghilda01/test_jenkins_branch'
@@ -45,11 +48,11 @@ spec:
                         echo "Deploying on ${env.BRANCH_NAME}..."
                         sh '''terraform version'''
                         sh '''terraform init'''
-                        sh '''terraform plan -out ${env.BRANCH_NAME}_${env.BUILD_NUMBER}'''
+                        sh '''terraform plan -out deployment.plan'''
                         script {
                             input message: "Should we apply this plan?", ok: "Yes, we should."
                         }
-                        sh '''terraform apply -input=false ${env.BRANCH_NAME}_${env.BUILD_NUMBER}'''
+                        sh '''terraform apply -input=false deployment.plan'''
                     }
                 }
             }
