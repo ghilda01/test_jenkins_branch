@@ -44,13 +44,12 @@ spec:
                     container('terraform') {
                         echo "Deploying on ${env.BRANCH_NAME}..."
                         sh '''terraform version'''
-//                        sh '''terraform init && terraform plan'''
-                    }
-                    script {
-                        input message: "Should we continue with ${AWS_ACCESS_KEY_ID}?", ok: "Yes, we should."
-                    }
-                    container('terraform') {
-                        echo "terraform apply"
+                        sh '''terraform init'''
+                        sh '''terraform plan -out ${env.BRANCH_NAME}_${env.BUILD_NUMBER}'''
+                        script {
+                            input message: "Should we apply this plan?", ok: "Yes, we should."
+                        }
+                        sh '''terraform apply -input=false ${env.BRANCH_NAME}_${env.BUILD_NUMBER}'''
                     }
                 }
             }
